@@ -5,7 +5,7 @@ const MongoClient = mongo.MongoClient;
 const dotenv = require('dotenv');
 dotenv.config()
 let port = process.env.PORT || 8230;
-const mongoUrl = process.env.mongoLiveUrl;
+const mongoUrl = "mongodb+srv://srushti:srushti15@zomato.inocb.mongodb.net/eduinternjan?retryWrites=true&w=majority";
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
@@ -29,6 +29,7 @@ app.get('/location', (req,res) =>{
         res.send(result)
     })
 })
+
 
 //restaurants
 app.get('/restaurants/',(req,res) => {
@@ -96,6 +97,55 @@ app.post('/menuItem',(req,res) => {
         res.send('Invalid Input')
     }
 })
+
+// place Order
+app.post('/placeOrder',(req,res) => {
+    db.collection('orders').insert(req.body,(err,result) => {
+        if(err) throw err;
+        res.send('Order Placed')
+    })
+})
+
+// View Order
+app.get('/viewOrder',(req,res) => {
+    let email = req.query.email;
+    let query = {};
+    if(email){
+        query = {"email":email}
+    }
+    db.collection('orders').find(query).toArray((err,result) => {
+        if(err) throw err;
+        res.send(result)
+    })
+})
+
+
+// delete order
+app.delete('/deleteOrders',(req,res)=>{
+    db.collection('orders').remove({},(err,result) => {
+        res.send('order deleted')
+    })
+})
+
+
+//update orders
+app.put('/updateOrder/:id',(req,res) => {
+    console.log(">>>id",req.params.id)
+    console.log(">>>id",req.body)
+    let oId = Number(req.params.id)
+    db.collection('orders').updateOne(
+        {id:oId},
+        {$set:{
+            "status":req.body.status,
+            "bank_name":req.body.bank_name,
+            "date":req.body.date
+        }},(err,result) => {
+            if(err) throw err
+            res.send(`Status Updated to ${req.body.status}`)
+        }
+    )
+})
+
 
 
 //connection with db
